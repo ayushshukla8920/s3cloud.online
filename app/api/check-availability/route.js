@@ -1,6 +1,10 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
-
+const forbiddenSubdomains = [
+  'www', 'mail', 'smtp', 'imap', 'ftp', 'webmail',
+  'autoconfig', 'autodiscover', 'cpanel', 'admin',
+  'test', 'api', 'ns1', 'ns2', 'root', '*', 'localhost','mx'
+];
 export const POST = async (req) => {
   try {
     const body = await req.json();
