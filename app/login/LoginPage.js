@@ -1,69 +1,110 @@
-"use client"
-import { useState } from "react"
-import { useRouter, useSearchParams } from "next/navigation"
-import { Eye, EyeOff } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+"use client";
+import { TbReload } from "react-icons/tb";
+import { useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Eye, EyeOff } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card"
-import Link from "next/link"
+} from "@/components/ui/card";
+import Link from "next/link";
 
 export default function LoginPage() {
-  const [showPassword, setShowPassword] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState("")
-  const [formData, setFormData] = useState({ email: "", password: "" })
+  const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [formData, setFormData] = useState({ email: "", password: "" });
+  const [captchaSVG, setCaptchaSVG] = useState(null);
+  const [encrypted, setEncrypted] = useState("");
+  const [usercaptcha, setusercaptcha] = useState("");
 
-  const router = useRouter()
-  const searchParams = useSearchParams()
-  const domain = searchParams.get("domain")
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const domain = searchParams.get("domain");
+
+  const generateCaptcha = () => {
+    fetch("/api/generate-captcha")
+      .then((res) => res.json())
+      .then((data) => {
+        setCaptchaSVG(data.image);
+        setEncrypted(data.text);
+      });
+  };
+  useEffect(() => {
+    generateCaptcha();
+  }, []);
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value })
-  }
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
-    setIsLoading(true)
-    setError("")
+    e.preventDefault();
+    setIsLoading(true);
+    setError("");
 
     try {
+      const cap = await fetch("/api/validate-captcha", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userInput: usercaptcha,
+          encrypted: encrypted,
+        }),
+      });
+
+      const capdata = await cap.json();
+      if (cap.ok) {
+        if (!capdata.success) {
+          alert("Invalid Captcha");
+          generateCaptcha();
+          setIsLoading(false);
+          return;
+        }
+      } else {
+        alert("Failed to Validate Captcha");
+        setIsLoading(false);
+        return;
+      }
       const res = await fetch("/api/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
-      })
+      });
 
-      const data = await res.json()
+      const data = await res.json();
 
       if (res.ok && data.token) {
-        localStorage.setItem("token", data.token)
+        localStorage.setItem("token", data.token);
         if (domain) {
-          router.push(`/checkout?domain=${encodeURIComponent(domain)}`)
+          router.push(`/checkout?domain=${encodeURIComponent(domain)}`);
         } else {
-          router.push("/")
+          router.push("/");
         }
       } else {
-        setError(data.err || "Invalid email or password")
+        setError(data.err || "Invalid email or password");
       }
     } catch (err) {
-      setError("Something went wrong. Please try again.")
+      setError("Something went wrong. Please try again.");
     }
 
-    setIsLoading(false)
-  }
+    setIsLoading(false);
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <Link href="/" className="inline-flex items-center space-x-2 text-2xl font-bold text-gray-900">
+          <Link
+            href="/"
+            className="inline-flex items-center space-x-2 text-2xl font-bold text-gray-900"
+          >
             <img src="/S3.png" className="h-10 w-15" />
             <span>S3Cloud Domains</span>
           </Link>
@@ -107,9 +148,39 @@ export default function LoginPage() {
                     className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
                     onClick={() => setShowPassword(!showPassword)}
                   >
-                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    {showPassword ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
                   </Button>
                 </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="email">Captcha</Label>
+                <div className="flex items-center gap-2">
+                  <div
+                    className="w-[160px] h-[60px]"
+                    dangerouslySetInnerHTML={{ __html: captchaSVG }}
+                  />
+                  <TbReload
+                    onClick={generateCaptcha}
+                    className="w-6 h-6 hover:cursor-pointer"
+                    title="Re-generate Captcha"
+                  />
+                </div>
+
+                <Input
+                  id="captcha"
+                  name="captcha"
+                  type="captcha"
+                  placeholder="Enter captcha text"
+                  value={usercaptcha}
+                  onChange={(e) => {
+                    setusercaptcha(e.target.value);
+                  }}
+                  required
+                />
               </div>
 
               {error && <p className="text-red-600 text-sm">{error}</p>}
@@ -127,7 +198,11 @@ export default function LoginPage() {
               <p className="text-sm text-gray-600">
                 Don't have an account?{" "}
                 <Link
-                  href={domain ? `/signup?domain=${encodeURIComponent(domain)}` : "/signup"}
+                  href={
+                    domain
+                      ? `/signup?domain=${encodeURIComponent(domain)}`
+                      : "/signup"
+                  }
                   className="text-blue-600 hover:underline font-medium"
                 >
                   Sign up
@@ -138,5 +213,5 @@ export default function LoginPage() {
         </Card>
       </div>
     </div>
-  )
+  );
 }
