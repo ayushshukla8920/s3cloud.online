@@ -23,6 +23,7 @@ export const POST = async(req)=>{
         token = jwt.sign(email,process.env.JWT_SECRET);
     }
     catch(error){
+        console.log(error);
         return NextResponse.json({error: "Internal Server Error"},{status: 500});
     }
     return NextResponse.json({msg:"Signup Successful",token},{status: 200});
