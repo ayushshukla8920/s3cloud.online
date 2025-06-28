@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/card";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
+import { TbReload } from "react-icons/tb";
 
 export default function SignupPage() {
   const [showPassword, setShowPassword] = useState(false);
@@ -200,10 +201,13 @@ export default function SignupPage() {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="email">Captcha</Label>
-                  <div
-                    className="w-[160px] h-[60px]"
-                    dangerouslySetInnerHTML={{ __html: captchaSVG }}
-                  />
+                  <div className="flex items-center gap-2">
+                    <div
+                      className="w-[160px] h-[60px]"
+                      dangerouslySetInnerHTML={{ __html: captchaSVG }}
+                    />
+                    <TbReload onClick={generateCaptcha} className="w-6 h-6 hover:cursor-pointer" title="Re-generate Captcha" />
+                  </div>
 
                   <Input
                     id="captcha"
