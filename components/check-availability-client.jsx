@@ -89,10 +89,10 @@ export default function CheckAvailabilityClient() {
                 <div className="w-4 h-4 rounded-full bg-red-500"></div>
                 <span className="text-lg font-semibold">{searchResults.domain}</span>
               </div>
-              <span className="text-red-600 font-medium">Not Available</span>
+              <span className="text-red-600 font-medium">{searchResults.message == 'Not Allowed' ? 'Not Allowed' : 'Not Available'}</span>
             </div>
             <p className="text-gray-600 mt-2">
-              This domain is already taken. Try a different name.
+              {searchResults.message == 'Not Allowed' ? 'This Subdomain is Reserved and not allowed to be taken.' : 'This domain is already taken. Try a different name.'}
             </p>
           </CardContent>
         </Card>
