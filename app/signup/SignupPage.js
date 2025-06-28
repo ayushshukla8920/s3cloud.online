@@ -30,18 +30,18 @@ export default function SignupPage() {
   const searchParams = useSearchParams();
   const domain = searchParams.get("domain");
 
-  const generateCaptcha = ()=>{
+  const generateCaptcha = () => {
     fetch("/api/generate-captcha")
       .then((res) => res.json())
       .then((data) => {
         setCaptchaSVG(data.image);
         setEncrypted(data.text);
       });
-  }
+  };
 
   useEffect(() => {
     generateCaptcha();
-  },[]);
+  }, []);
 
   const handleChange = (e) => {
     setFormData({
@@ -71,15 +71,14 @@ export default function SignupPage() {
       });
 
       const capdata = await cap.json();
-      if(cap.ok){
-        if(!capdata.success){
+      if (cap.ok) {
+        if (!capdata.success) {
           alert("Invalid Captcha");
           generateCaptcha();
           setIsLoading(false);
           return;
         }
-      }
-      else{
+      } else {
         alert("Failed to Validate Captcha");
         setIsLoading(false);
         return;
@@ -201,14 +200,20 @@ export default function SignupPage() {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="email">Captcha</Label>
-                  <img src={captchaSVG} alt="CAPTCHA" />
+                  <div
+                    className="w-[160px] h-[60px]"
+                    dangerouslySetInnerHTML={{ __html: captchaSVG }}
+                  />
+
                   <Input
                     id="captcha"
                     name="captcha"
                     type="captcha"
                     placeholder="Enter captcha text"
                     value={usercaptcha}
-                    onChange={(e)=>{setusercaptcha(e.target.value)}}
+                    onChange={(e) => {
+                      setusercaptcha(e.target.value);
+                    }}
                     required
                   />
                 </div>
