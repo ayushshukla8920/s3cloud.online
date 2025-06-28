@@ -6,7 +6,7 @@ const inter = Inter({ subsets: ["latin"] });
 export const metadata = {
   title: "S3Cloud Domains - Free Subdomains",
   icons: {
-    icon: "/favicon.ico",
+    icon: "/S3.png",
   },
   description:
     "Get your free subdomain on s3cloud.online instantly. Perfect for developers, startups, and personal projects.",
