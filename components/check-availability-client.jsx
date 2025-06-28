@@ -35,6 +35,7 @@ export default function CheckAvailabilityClient() {
       setSearchResults({
         domain: `${searchTerm}.s3cloud.online`,
         available: result.available,
+        message: result.message
       })
     } catch (err) {
       console.error("Search error:", err)
