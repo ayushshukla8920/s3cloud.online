@@ -7,7 +7,7 @@ const JWT_SECRET = process.env.JWT_SECRET;
 const forbiddenSubdomains = [
   'www', 'mail', 'smtp', 'imap', 'ftp', 'webmail',
   'autoconfig', 'autodiscover', 'cpanel', 'admin',
-  'test', 'api', 'ns1', 'ns2', 'root', '*', 'localhost'
+  'test', 'api', 'ns1', 'ns2', 'root', '*', 'localhost','mx'
 ];
 export const POST = async (req) => {
   try {
