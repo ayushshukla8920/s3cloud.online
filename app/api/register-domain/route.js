@@ -4,13 +4,30 @@ import prisma from "@/lib/prisma";
 const jwt = require('jsonwebtoken');
 
 const JWT_SECRET = process.env.JWT_SECRET;
-
+const forbiddenSubdomains = [
+  'www', 'mail', 'smtp', 'imap', 'ftp', 'webmail',
+  'autoconfig', 'autodiscover', 'cpanel', 'admin',
+  'test', 'api', 'ns1', 'ns2', 'root', '*', 'localhost'
+];
 export const POST = async (req) => {
   try {
     const body = await req.json();
 
     if (!body.jwt || !body.alias) {
       return NextResponse.json({ err: "Invalid Request" }, { status: 400 });
+    }
+
+    const alias = body.alias.slice(0, -15);
+    const normalized = alias.toLowerCase();
+    if(normalized.includes('*') || normalized.includes('.') || normalized.includes(" "){
+      return NextResponse.json({err: "Invalid Subdomain"}, {status: 400})
+    }
+    if (forbiddenSubdomains.includes(normalized)){
+      return NextResponse.json({err: "Invalid Subdomain"}, {status: 400})
+    }
+    const subdomainRegex = /^[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?$/;
+    if(!subdomainRegex.test(normalized)){
+      return NextResponse.json({err: "Invalid Subdomain"}, {status: 400})
     }
 
     // 🔐 Verify and decode JWT
@@ -33,7 +50,7 @@ export const POST = async (req) => {
 
     // 🌐 Add DNS record via Cloudflare
     const dnsData = {
-      name: body.alias,
+      name: normalized,
       ttl: 60,
       type: "A",
       comment: "Domain Registered by "+userEmail,

@@ -4,23 +4,45 @@ import prisma from "@/lib/prisma";
 export const POST = async (req) => {
   try {
     const body = await req.json();
-    const { alias } = body;
-
-    if (!alias || typeof alias !== "string") {
+    if (!body.alias || typeof body.alias !== "string") {
       return NextResponse.json({ err: "Alias is required" }, { status: 400 });
     }
-
+    const alias = body.alias.slice(0, -15);
+    const normalized = alias.toLowerCase();
+    if (normalized.includes("*") || normalized.includes(".") || normalized.includes(" ")) {
+      return NextResponse.json({
+        available: false,
+        message: "Not Allowed",
+      });
+    }
+    if (forbiddenSubdomains.includes(normalized)) {
+      return NextResponse.json({
+        available: false,
+        message: "Not Allowed",
+      });
+    }
+    const subdomainRegex = /^[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?$/;
+    if (!subdomainRegex.test(normalized)) {
+      return NextResponse.json({
+        available: false,
+        message: "Not Allowed",
+      });
+    }
     // Check if subdomain exists
     const existing = await prisma.subdomain.findUnique({
-      where: { subdomain: `${alias}.s3cloud.online` }
+      where: { subdomain: `${normalized}.s3cloud.online` },
     });
-
     if (existing) {
-      return NextResponse.json({ available: false, message: "Subdomain already taken" });
+      return NextResponse.json({
+        available: false,
+        message: "Subdomain already taken",
+      });
     } else {
-      return NextResponse.json({ available: true, message: "Subdomain is available" });
+      return NextResponse.json({
+        available: true,
+        message: "Subdomain is available",
+      });
     }
-
   } catch (error) {
     console.error("Error checking subdomain:", error);
     return NextResponse.json({ err: "Internal Server Error" }, { status: 500 });
