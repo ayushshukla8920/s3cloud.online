@@ -1,54 +1,74 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+
+// 🚫 Reserved subdomains — expand as needed
 const forbiddenSubdomains = [
   'www', 'mail', 'smtp', 'imap', 'ftp', 'webmail',
   'autoconfig', 'autodiscover', 'cpanel', 'admin',
-  'test', 'api', 'ns1', 'ns2', 'root', '*', 'localhost','mx'
+  'test', 'api', 'ns1', 'ns2', 'root', '*', 'localhost', 'mx'
 ];
+
 export const POST = async (req) => {
   try {
     const body = await req.json();
-    if (!body.alias || typeof body.alias !== "string") {
+    let alias = body.alias?.toLowerCase();
+
+    // ✅ Ensure alias is a valid string
+    if (!alias || typeof alias !== "string") {
       return NextResponse.json({ err: "Alias is required" }, { status: 400 });
     }
-    const alias = body.alias.slice(0, -15);
-    const normalized = alias.toLowerCase();
-    if (normalized.includes("*") || normalized.includes(".") || normalized.includes(" ")) {
+
+    // Optional: strip .s3cloud.online from input
+    if (alias.endsWith(".s3cloud.online")) {
+      alias = alias.replace(".s3cloud.online", "");
+    }
+
+    // ✅ Basic checks
+    if (
+      forbiddenSubdomains.includes(alias) ||
+      alias.includes("*") ||
+      alias.includes(".") ||
+      alias.includes(" ") ||
+      alias.length > 63
+    ) {
       return NextResponse.json({
         available: false,
         message: "Not Allowed",
       });
     }
-    if (forbiddenSubdomains.includes(normalized)) {
-      return NextResponse.json({
-        available: false,
-        message: "Not Allowed",
-      });
-    }
+
+    // ✅ Format validation
     const subdomainRegex = /^[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?$/;
-    if (!subdomainRegex.test(normalized)) {
+    if (!subdomainRegex.test(alias)) {
       return NextResponse.json({
         available: false,
-        message: "Not Allowed",
+        message: "Invalid format",
       });
     }
-    // Check if subdomain exists
+
+    // ✅ Check if subdomain exists in DB
+    const fullSubdomain = `${alias}.s3cloud.online`;
     const existing = await prisma.subdomain.findUnique({
-      where: { subdomain: `${normalized}.s3cloud.online` },
+      where: { subdomain: fullSubdomain },
     });
+
     if (existing) {
       return NextResponse.json({
         available: false,
         message: "Subdomain already taken",
       });
-    } else {
-      return NextResponse.json({
-        available: true,
-        message: "Subdomain is available",
-      });
     }
+
+    return NextResponse.json({
+      available: true,
+      message: "Subdomain is available",
+    });
+
   } catch (error) {
     console.error("Error checking subdomain:", error);
-    return NextResponse.json({ err: "Internal Server Error" }, { status: 500 });
+    return NextResponse.json(
+      { err: "Internal Server Error" },
+      { status: 500 }
+    );
   }
 };
