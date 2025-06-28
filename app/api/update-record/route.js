@@ -45,7 +45,7 @@ export const POST = async (req) => {
     }
 
     const dnsData = {
-      name: `${alias}.s3cloud.online`,
+      name: alias,
       ttl: 60,
       type: "A",
       comment: "Domain Registered by "+userEmail,

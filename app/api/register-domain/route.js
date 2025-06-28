@@ -33,7 +33,7 @@ export const POST = async (req) => {
 
     // 🌐 Add DNS record via Cloudflare
     const dnsData = {
-      name: `${body.alias}.s3cloud.online`,
+      name: body.alias,
       ttl: 60,
       type: "A",
       comment: "Domain Registered by "+userEmail,

@@ -111,7 +111,7 @@ export default function DashboardPage() {
       if (!res.ok) {
         alert(data.err || "Failed to update A record.");
       } else {
-        setSuccessMsg("Record updated successfully!");
+        setSuccessMsg("Record updated successfully! DNS changes may take upto 30 mins to take effect.");
         setTimeout(() => setSuccessMsg(""), 10000);
         loadDomains(token);
       }
