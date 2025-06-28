@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "npx prisma generate && next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "push": "git add . && git commit -m 'UI Changes' && git push -u origin main"
   },
   "dependencies": {
     "@prisma/client": "^6.10.1",
