@@ -19,7 +19,7 @@ export const POST = async (req) => {
 
     const alias = body.alias.slice(0, -15);
     const normalized = alias.toLowerCase();
-    if(normalized.includes('*') || normalized.includes('.') || normalized.includes(" "){
+    if(normalized.includes('*') || normalized.includes('.') || normalized.includes(" ")){
       return NextResponse.json({err: "Invalid Subdomain"}, {status: 400})
     }
     if (forbiddenSubdomains.includes(normalized)){
