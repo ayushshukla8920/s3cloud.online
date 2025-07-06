@@ -25,7 +25,7 @@ export default function PaymentPage() {
     });
     const order = await response.json();
     const options = {
-      key: process.env.NODE_ENV === 'production' ? process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID : process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID_TEST,
+      key: process.env.NODE_ENV === 'production' ? 'rzp_test_LcC5KDhHEw2Ljp' : process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID_TEST,
       amount: order.amount,
       currency: order.currency,
       name: 'S3Cloud Domains',
