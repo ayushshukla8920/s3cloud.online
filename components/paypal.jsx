@@ -4,7 +4,7 @@ import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
 
 function Paypal({ d, a, iv }) {
   const initialOptions = {
-    "client-id": process.env.NODE_ENV == 'production' ? process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID : process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID_SAND,
+    "client-id": process.env.NODE_ENV == 'production' ? process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID_SAND : process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID_SAND,
     "enable-funding": "venmo",
     "buyer-country": "US",
     currency: "USD",
