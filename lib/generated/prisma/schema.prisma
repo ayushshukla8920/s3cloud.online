@@ -1,0 +1,29 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../lib/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("POSTGRES_CONNECTION_STRING")
+}
+
+model User {
+  id             String      @id @default(uuid())
+  email          String      @unique
+  password       String
+  subdomains     Subdomain[] // One user has many subdomains
+  createdAt      DateTime    @default(now())
+  accountActive  Boolean     @default(true)
+  subdomainCount Int         @default(0)
+}
+
+model Subdomain {
+  id        Int      @id @default(autoincrement())
+  subdomain String   @unique
+  ip        String
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+  recordId  String? // <-- This is the new field for Cloudflare record ID (optional)
+  createdAt DateTime @default(now())
+}

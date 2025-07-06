@@ -9,11 +9,13 @@ datasource db {
 }
 
 model User {
-  id        String      @id @default(uuid())
-  email     String      @unique
-  password  String
-  subdomains Subdomain[] // One user has many subdomains
-  createdAt DateTime    @default(now())
+  id             String      @id @default(uuid())
+  email          String      @unique
+  password       String
+  subdomains     Subdomain[] // One user has many subdomains
+  createdAt      DateTime    @default(now())
+  accountActive  Boolean     @default(true)
+  subdomainCount Int         @default(0)
 }
 
 model Subdomain {

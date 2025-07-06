@@ -9,9 +9,43 @@ import { Card, CardContent } from "@/components/ui/card"
 export default function CheckAvailabilityClient() {
   const [searchTerm, setSearchTerm] = useState("")
   const [searchResults, setSearchResults] = useState(null)
-  const [isSearching, setIsSearching] = useState(false)
+  const [isSearching, setIsSearching] = useState(false);
+  const [encrypting, setEncrypting] = useState(false);
   const [error, setError] = useState("")
-  const router = useRouter()
+  const router = useRouter();
+
+  const handleSecureRedirect = async () => {
+    if (!searchResults?.domain) return;
+    setEncrypting(true);
+    try {
+      const res = await fetch("/api/encrypt-checkout", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          domain: searchResults.domain,
+          amount: 1.99,
+        }),
+      });
+      const data = await res.json();
+      console.log("Encryption response:", data);
+      if (res.ok && data?.domain && data?.amount && data?.iv) {
+        router.push(
+          `/checkout?d=${encodeURIComponent(data.domain)}&a=${encodeURIComponent(
+            data.amount
+          )}&iv=${encodeURIComponent(data.iv)}`
+        );
+      } else {
+        alert("Failed to secure checkout. Try again.");
+      }
+    } catch (err) {
+      console.error("Encryption error:", err);
+      alert("Something went wrong. Try again later.");
+    }
+    setEncrypting(false);
+  };
+
 
   const handleSearch = async (e) => {
     e.preventDefault()
@@ -112,13 +146,24 @@ export default function CheckAvailabilityClient() {
             <p className="text-gray-600 mt-2">
               Congratulations, your selected subdomain is available.
             </p>
-            <Button
-              size="lg"
-              onClick={() => router.push(`/checkout?domain=${searchResults.domain}`)}
-              className="hover:cursor-pointer mt-8 px-8 py-6 rounded-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
-            >
-              Get it Now
-            </Button>
+            {encrypting ? (
+              <Button
+                disabled={encrypting}
+                size="lg"
+                className="hover:cursor-pointer mt-8 px-8 py-6 rounded-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+              >
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                <span className="ml-2">Processing...</span>
+              </Button>
+            ) : (
+              <Button
+                size="lg"
+                onClick={handleSecureRedirect}
+                className="hover:cursor-pointer mt-8 px-8 py-6 rounded-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+              >
+                Get it Now
+              </Button>
+            )}
           </CardContent>
         </Card>
       )}
