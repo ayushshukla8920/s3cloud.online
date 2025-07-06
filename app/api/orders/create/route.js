@@ -24,8 +24,8 @@ function decryptAES256(encrypted, iv) {
 
 const client = new Client({
     clientCredentialsAuthCredentials: {
-        oAuthClientId: process.env.NODE_ENV == 'production' ? process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID : process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID_SAND,
-        oAuthClientSecret: process.env.NODE_ENV == 'production' ? process.env.NEXT_PUBLIC_PAYPAL_CLIENT_SECRET : process.env.NEXT_PUBLIC_PAYPAL_CLIENT_SECRET_SAND,
+        oAuthClientId: process.env.NODE_ENV == 'production' ? process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID_SAND : process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID_SAND,
+        oAuthClientSecret: process.env.NODE_ENV == 'production' ? process.env.NEXT_PUBLIC_PAYPAL_CLIENT_SECRET_SAND : process.env.NEXT_PUBLIC_PAYPAL_CLIENT_SECRET_SAND,
     },
     timeout: 0,
     environment: Environment.Sandbox,
